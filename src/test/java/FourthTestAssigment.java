@@ -1,4 +1,4 @@
-import Common.DTO;
+import DataProviders.FourthAssigmentDataProviders;
 import FourthTestData.TaxManager;
 import FourthTestData.ValuesWasZeroOrNegativeException;
 import org.testng.Assert;
@@ -8,12 +8,9 @@ import org.testng.annotations.Test;
 public class FourthTestAssigment {
 
 
-    @Test
-    public void testIfGrossAmountIsCalculatedCorrectly() {
+    @Test(dataProvider = "validValues", dataProviderClass = FourthAssigmentDataProviders.class)
+    public void testIfGrossAmountIsCalculatedCorrectly(double netAmount, double vatMultiplyer, double expectedResult) {
 
-        double netAmount = 3.57;
-        double vatMultiplyer = DTO.valueAddedTaxMultiplyer;
-        double expectedResult = 4.3197;
         double actualResult = TaxManager.getGrossAmount(netAmount, vatMultiplyer);
 
         Assert.assertEquals(actualResult, expectedResult,
@@ -22,30 +19,16 @@ public class FourthTestAssigment {
 
     }
 
-    @Test
-    public void testIfValuesCannotBeBelowZero() {
+    @Test(dataProvider = "invalidValues", dataProviderClass = FourthAssigmentDataProviders.class, expectedExceptions = ValuesWasZeroOrNegativeException.class)
+    public void testIfValuesCannotBeBelowZero(double netAmount, double vatMultiplyer) {
 
-        boolean wasExpectionThrown = false;
-        double netAmount = 3.57;
-        double vatMultiplyer = -1;
+        double grossAmount = TaxManager.getGrossAmount(netAmount, vatMultiplyer);
 
-        try{
-        double grossAmount = TaxManager.getGrossAmount(netAmount,vatMultiplyer);
-        }
-        catch (ValuesWasZeroOrNegativeException e){
-            wasExpectionThrown = true;
-            e.printStackTrace();
-        }
-
-        Assert.assertTrue(wasExpectionThrown);
 
     }
 
-    @Test
-    public void testIfRoundingWorksCorrectly() {
-        double netAmount = 3.57;
-        double vatMultiplyer = DTO.valueAddedTaxMultiplyer;
-        double expectedResult = 4.32;
+    @Test(dataProvider = "validValuesForRounding", dataProviderClass = FourthAssigmentDataProviders.class)
+    public void testIfRoundingWorksCorrectly(double netAmount, double vatMultiplyer, double expectedResult) {
         double actualResult = TaxManager.getGrossAmountRounded(netAmount, vatMultiplyer);
         Assert.assertEquals(actualResult, expectedResult,
                 "Expected and actual does not match - rounded value is calculated incorrectly");
